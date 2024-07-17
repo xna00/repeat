@@ -1,0 +1,26 @@
+{
+  "name": "自由音乐",
+  "short_name": "自由音乐",
+  "start_url": "/",
+  "display_override": [
+    "window-controls-overlay"
+  ],
+  "display": "standalone",
+  "background_color": "#fff",
+  "theme_color": "white",
+  "prefer_related_applications": true,
+  "icons": [
+    {
+      "src": "/144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/music.svg",
+      "sizes": "any",
+      "type": "image/svg",
+      "purpose": "any"
+    }
+  ]
+}

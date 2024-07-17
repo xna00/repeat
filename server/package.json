@@ -1,0 +1,33 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc; npx rollup -c rollup.config.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/cookie": "^0.6.0",
+    "@types/node": "^20.14.10",
+    "rollup": "^4.9.3",
+    "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-ts": "^3.4.5",
+    "tslib": "^2.6.2"
+  },
+  "dependencies": {
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "cookie": "^0.6.0",
+    "reflect-metadata": "^0.2.2",
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.20"
+  }
+}
