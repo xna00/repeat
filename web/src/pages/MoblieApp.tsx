@@ -2,12 +2,11 @@ import day from "dayjs";
 import { useEffect, useRef, useState } from "react";
 import type { WordRecord } from "server/models/word";
 import { api } from "../api";
-import Drawer from "../components";
-import { useWords, type FilterFormData } from "../hooks/useWords";
-import { playWord, stringifyMeaning } from "../tools";
-import Select from "../components/Select";
-import SelectOrder from "../components/SelectOrder";
 import { getSense } from "../api/cache";
+import Drawer from "../components";
+import SelectOrder from "../components/SelectOrder";
+import { useWords } from "../hooks/useWords";
+import { playWord, stringifyMeaning } from "../tools";
 
 type Sense = Awaited<ReturnType<typeof api.learn.getSense>>;
 
@@ -16,11 +15,13 @@ const Tr = ({
   pendingWord,
   setPendingWord,
   setDetailWord,
+  loadAllWords,
 }: {
   row: WordRecord;
   pendingWord?: string;
   setPendingWord: (v: string) => void;
-  setDetailWord: (v: WordRecord) => void;
+  setDetailWord: (v: WordRecord | undefined) => void;
+  loadAllWords: () => void;
 }) => {
   const [word, setWord] = useState(row);
   const [grade, setGrade] = useState<number>();
@@ -46,80 +47,93 @@ const Tr = ({
   }, [grade, pending]);
 
   return (
-    <li
-      className="flex items-center border-b border-b-orange-100 py-1"
-      onClick={() => {
-        if (!played.current) {
-          playWord(word.text);
-          played.current = true;
-        }
-      }}
-    >
-      <div className="overflow-hidden flex-grow">
-        <div className="flex items-center">
-          <div className="mr-1">
-            <a
-              href=""
-              onClick={(e) => {
-                e.preventDefault();
-                setDetailWord({ ...word, ...sense });
+    <li className="flex overflow-x-scroll overflow-y-hidden snap-x snap-mandatory">
+      <div
+        className="flex items-center border-b border-b-orange-100 py-1 w-full flex-shrink-0 snap-start word-box"
+        onClick={() => {
+          if (!played.current) {
+            playWord(word.text);
+            played.current = true;
+          }
+        }}
+      >
+        <div className="overflow-hidden flex-grow">
+          <div className="flex items-center">
+            <div className="mr-1">
+              <a
+                href=""
+                onClick={(e) => {
+                  e.preventDefault();
+                  setDetailWord({ ...word, ...sense });
+                }}
+              >
+                {word.text}
+              </a>
+            </div>
+            <p className="text-xs text-ellipsis whitespace-nowrap overflow-hidden">
+              <a
+                href={`https://cn.bing.com/dict/search?q=${word.text}`}
+                target="_blank"
+              >
+                {stringifyMeaning(sense?.meaning)}
+              </a>
+            </p>
+          </div>
+          <div className="text-sm">
+            <span className="mr-2">
+              {word.lastGrade}/
+              {word.lastTime
+                ? day(word.lastTime).format(
+                    day(word.lastTime).year() === day().year()
+                      ? "MM-DD HH:mm:ss"
+                      : "YY-MM-DD HH:mm:ss"
+                  )
+                : "-"}
+            </span>
+            <span>
+              {word.averageGrade.toFixed(2)}/{word.learnCount}
+            </span>
+          </div>
+        </div>
+        <div className="flex-shrink-0">
+          {[1, 2, 3].map((g) => (
+            <button
+              key={g}
+              className={`bg-gray-200 w-8 h-8 rounded-full ml-1 border cursor-pointer ${
+                grade === g
+                  ? !pending
+                    ? "border-green-300"
+                    : "border-red-300"
+                  : "border-none"
+              }`}
+              onClick={() => {
+                console.log(grade, pending);
+                if (grade === undefined || pending) {
+                  setGrade(g);
+                  setPendingWord(row.text);
+                }
+                if (!sense) {
+                  getSense(word.text).then((r) => {
+                    setSense(r);
+                  });
+                }
               }}
             >
-              {word.text}
-            </a>
-          </div>
-          <p className="text-xs text-ellipsis whitespace-nowrap overflow-hidden">
-            <a
-              href={`https://cn.bing.com/dict/search?q=${word.text}`}
-              target="_blank"
-            >
-              {stringifyMeaning(sense?.meaning)}
-            </a>
-          </p>
-        </div>
-        <div className="text-sm">
-          <span className="mr-2">
-            {word.lastGrade}/
-            {word.lastTime
-              ? day(word.lastTime).format(
-                  day(word.lastTime).year() === day().year()
-                    ? "MM-DD HH:mm:ss"
-                    : "YY-MM-DD HH:mm:ss"
-                )
-              : "-"}
-          </span>
-          <span>
-            {word.averageGrade.toFixed(2)}/{word.learnCount}
-          </span>
+              {g}
+            </button>
+          ))}
         </div>
       </div>
-      <div className="flex-shrink-0">
-        {[1, 2, 3].map((g) => (
-          <button
-            key={g}
-            className={`bg-gray-200 w-8 h-8 rounded-full ml-1 border cursor-pointer ${
-              grade === g
-                ? !pending
-                  ? "border-green-300"
-                  : "border-red-300"
-                : "border-none"
-            }`}
-            onClick={() => {
-              console.log(grade, pending);
-              if (grade === undefined || pending) {
-                setGrade(g);
-                setPendingWord(row.text);
-              }
-              if (!sense) {
-                getSense(word.text).then((r) => {
-                  setSense(r);
-                });
-              }
-            }}
-          >
-            {g}
-          </button>
-        ))}
+      <div
+        className="bg-red-300 w-20 self-stretch flex-shrink-0 snap-start ml-px"
+        onClick={() => {
+          api.word.removeWord(word.text).then(() => {
+            setDetailWord(undefined);
+            loadAllWords();
+          });
+        }}
+      >
+        <button>删除</button>
       </div>
     </li>
   );
@@ -132,7 +146,7 @@ export default () => {
 
   return (
     <div className="">
-      <header className="flex text-lg gap-x-3 [&:has(>:checked)~ol>li]:flex-row-reverse sticky top-0 bg-white p-2 items-center">
+      <header className="flex text-lg gap-x-3 [&:has(>:checked)~ol>li>div.word-box]:flex-row-reverse sticky top-0 bg-white p-2 items-center">
         <button onClick={() => setFilterVisible(true)}>Filter</button>
         <input type="checkbox" className="" />
         {formData.pageNumber}-{formData.pageSize}-{allWords.length}
@@ -209,6 +223,7 @@ export default () => {
             pendingWord={pendingWord}
             setPendingWord={setPendingWord}
             setDetailWord={setDetailWord}
+            loadAllWords={loadAllWords}
           ></Tr>
         ))}
       </ol>
@@ -224,9 +239,7 @@ export default () => {
             <div>
               <span className="text-3xl">{detailWord.text}</span>
               {detailWord.phonetic && <span>/{detailWord.phonetic}/</span>}
-              <button className="border" popoverTarget="mypopover">
-                Delete
-              </button>
+              <button className="border">Delete</button>
               <button
                 className="border"
                 onClick={() => {
@@ -245,21 +258,6 @@ export default () => {
               >
                 Reload
               </button>
-              <div id="mypopover" popover="">
-                Are you sure?
-                <br />
-                <button
-                  className="broder"
-                  onClick={() => {
-                    api.word.removeWord(detailWord.text).then(() => {
-                      setDetailWord(undefined);
-                      loadAllWords();
-                    });
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
             </div>
           )}
 
