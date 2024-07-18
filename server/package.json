@@ -8,6 +8,7 @@
     "build": "tsc; npx rollup -c rollup.config.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -15,19 +16,18 @@
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.5",
+    "@types/better-sqlite3": "^7.6.11",
     "@types/cookie": "^0.6.0",
     "@types/node": "^20.14.10",
-    "rollup": "^4.9.3",
-    "rollup-plugin-dts": "^6.1.0",
-    "rollup-plugin-ts": "^3.4.5",
-    "tslib": "^2.6.2"
+    "drizzle-kit": "^0.23.0",
+    "rollup": "^4.9.3"
   },
   "dependencies": {
+    "@libsql/client": "^0.7.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-terser": "^0.4.4",
+    "better-sqlite3": "^11.1.2",
     "cookie": "^0.6.0",
-    "reflect-metadata": "^0.2.2",
-    "sqlite3": "^5.1.7",
-    "typeorm": "^0.3.20"
+    "drizzle-orm": "^0.32.0"
   }
 }

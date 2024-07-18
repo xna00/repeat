@@ -1,17 +1,19 @@
-import { NewUser, User } from "../models/user.js";
-import { state, idMap } from "./global.js";
 import cookie from "cookie";
+import { eq } from "drizzle-orm";
+import { db } from "../drizzle/db.js";
+import { type NewUser, user } from "../drizzle/schema.js";
+import { idMap, state } from "./global.js";
 import { makeJsonResponse, makeJsonResponse200 } from "./utils.js";
 
-export const login = async (user: NewUser) => {
+export const login = async (_user: NewUser) => {
   const id = state.id;
-  const u = await User.findOneBy({
-    username: user.username,
-  });
+  const u = (
+    await db.select().from(user).where(eq(user.username, _user.username))
+  ).at(0);
   if (!u) {
     throw "Username is not existed!";
   }
-  if (u.password !== user.password) {
+  if (u.password !== _user.password) {
     throw "Password is incorrect!";
   }
 

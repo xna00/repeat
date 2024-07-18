@@ -1,30 +1,33 @@
-import { defineConfig } from "rollup";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
-import json from '@rollup/plugin-json'
+import json from '@rollup/plugin-json';
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 import terser from "@rollup/plugin-terser";
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join, relative } from "path";
+import { defineConfig } from "rollup";
 
 export default defineConfig({
   input: ["dist/main.js"],
   output: [
     {
-      format: "cjs",
+      format: "es",
       name: 'server.js',
       file: 'dist/server.js'
     },
   ],
-  external: ['sqlite3'],
+  external: ['sqlite3', 'better-sqlite3'],
   plugins: [
     json(),
     nodeResolve({
       exportConditions: ["node"],
+
     }),
     commonjs(),
-    terser({
-      mangle: false
-    }),
+    // terser({
+    //   compress: false,
+    //   mangle: false,
+
+    // }),
     {
       name: 'replace-static-files',
 

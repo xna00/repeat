@@ -1,4 +1,4 @@
-import { IncomingHttpHeaders, OutgoingHttpHeaders } from "http";
+import type { OutgoingHttpHeaders } from "http";
 
 export const state = {
   id: 0,

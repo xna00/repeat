@@ -1,42 +1,59 @@
-import { Log, NewLog } from "../models/log";
-import { Word } from "../models/word";
-import { getInfo } from "./global";
-import { _currentUser } from "./user";
+// import { Log, NewLog } from "../models/log.js";
+// import { Word } from "../models/word.js";
+import { eq } from "drizzle-orm";
+import { db } from "../drizzle/db.js";
+import { type NewLog, log, word } from "../drizzle/schema.js";
+import { getInfo } from "./global.js";
+import { _currentUser } from "./user.js";
+import type { OmitFrom } from "../drizzle/utils.js";
 
-export const learn = async (log: NewLog) => {
+export const learn = async (l: OmitFrom<NewLog, "createAt" | "userId">) => {
   const info = getInfo();
   const date = new Date();
   const user = await _currentUser(info);
 
-  console.log(log);
-  const word = await Word.findOne({
-    where: {
-      user,
-      text: log.word,
-    },
-  });
-  if (!word) {
-    throw "Unknown word " + word;
+  console.log(l);
+  const w = (await db.select().from(word).where(eq(word.text, l.word))).at(0);
+  // const w = await Word.findOne({
+  //   where: {
+  //     user,
+  //     text: log.word,
+  //   },
+  // });
+  if (!w) {
+    throw "Unknown word " + w;
   }
 
-  const l = new Log();
-  l.user = user;
-  l.word = log.word;
-  l.grade = log.grade;
-  l.createdAt = date;
+  await db.insert(log).values({
+    userId: user.id,
+    word: l.word,
+    grade: l.grade,
+    createAt: date.toISOString(),
+  });
 
-  await l.save();
+  // const l = new Log();
+  // l.user = user;
+  // l.word = l.word;
+  // l.grade = l.grade;
+  // l.createdAt = date;
 
-  const newCount = word.learnCount + 1;
-  word.averageGrade =
-    (word.averageGrade * word.learnCount + log.grade) / newCount;
-  word.learnCount = newCount;
+  // await l.save();
 
-  word.lastTime;
-  word.lastGrade = log.grade;
-  word.lastTime = date;
+  const newCount = w.learnCount + 1;
+  w.averageGrade = (w.averageGrade * w.learnCount + l.grade) / newCount;
+  w.learnCount = newCount;
 
-  await word.save();
+  w.lastTime;
+  w.lastGrade = l.grade;
+  w.lastTime = date.toISOString();
+
+  // await w.save();
+  await db
+    .update(word)
+    .set({
+      ...w,
+    })
+    .where(eq(word.id, w.id));
 
   return {};
 };

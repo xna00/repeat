@@ -1,6 +1,6 @@
 import day from "dayjs";
 import { useEffect, useRef, useState } from "react";
-import type { WordRecord } from "server/models/word";
+import type { WordRecord } from "server";
 import { api } from "../api";
 import { getSense } from "../api/cache";
 import Drawer from "../components";

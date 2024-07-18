@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import type { WordRecord } from "server/models/word";
+import type { WordRecord } from "server";
 import { api } from "../api";
 import day from "dayjs";
 import { stringifyMeaning } from "../tools";

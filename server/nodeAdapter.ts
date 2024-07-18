@@ -4,7 +4,7 @@ import type { IncomingMessage, ServerResponse } from "http";
 import { createServer } from "https";
 import { extname, join, relative } from "path";
 import { Readable } from "stream";
-import { apiHandler } from "./api/handler";
+import { apiHandler } from "./api/handler.js";
 
 const port = 3001;
 const base = `https://localhost:${port}`;
