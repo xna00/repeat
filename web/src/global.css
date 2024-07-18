@@ -12,3 +12,9 @@
 #root {
   height: 100vh;
 }
+
+::-webkit-scrollbar {
+  /* -webkit-appearance: none; */
+  /* height: 0; */
+  display: none;
+}
