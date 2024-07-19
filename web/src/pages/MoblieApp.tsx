@@ -16,12 +16,14 @@ const Tr = ({
   setPendingWord,
   setDetailWord,
   loadAllWords,
+  muted,
 }: {
   row: WordRecord;
   pendingWord?: string;
   setPendingWord: (v: string) => void;
   setDetailWord: (v: WordRecord | undefined) => void;
   loadAllWords: () => void;
+  muted: boolean;
 }) => {
   const [word, setWord] = useState(row);
   const [grade, setGrade] = useState<number>();
@@ -51,7 +53,7 @@ const Tr = ({
       <div
         className="flex items-center border-b border-b-orange-100 py-1 w-full flex-shrink-0 snap-start word-box"
         onClick={() => {
-          if (!played.current) {
+          if (!played.current && !muted) {
             playWord(word.text);
             played.current = true;
           }
@@ -70,15 +72,25 @@ const Tr = ({
                 {word.text}
               </a>
             </div>
-            <p className="text-xs text-ellipsis whitespace-nowrap overflow-hidden">
+            <div>
               <a
-                href={`https://cn.bing.com/dict/search?q=${word.text}`}
+                href={`https://dictionary.cambridge.org/dictionary/english-chinese-simplified/${word.text}`}
                 target="_blank"
+                className="text-sm"
               >
-                {stringifyMeaning(sense?.meaning)}
+                <img src="/cambridgeicon.ico" alt="" />
               </a>
-            </p>
+            </div>
           </div>
+          <p className="text-xs text-ellipsis whitespace-nowrap overflow-hidden">
+            <a
+              href={`https://cn.bing.com/dict/search?q=${word.text}`}
+              target="_blank"
+            >
+              {stringifyMeaning(sense?.meaning)}
+              &#8203;
+            </a>
+          </p>
           <div className="text-sm">
             <span className="mr-2">
               {word.lastGrade}/
@@ -143,6 +155,7 @@ export default () => {
   const [detailWord, setDetailWord] = useState<WordRecord & Partial<Sense>>();
   const [pendingWord, setPendingWord] = useState<string>();
   const [filterVisible, setFilterVisible] = useState(false);
+  const [muted, setMuted] = useState(false);
 
   return (
     <div className="">
@@ -150,6 +163,9 @@ export default () => {
         <button onClick={() => setFilterVisible(true)}>Filter</button>
         <input type="checkbox" className="" />
         {formData.pageNumber}-{formData.pageSize}-{allWords.length}
+        <button onClick={() => setMuted(!muted)}>
+          {muted ? "unmute" : "mute"}
+        </button>
       </header>
       <Drawer
         visible={filterVisible}
@@ -224,6 +240,7 @@ export default () => {
             setPendingWord={setPendingWord}
             setDetailWord={setDetailWord}
             loadAllWords={loadAllWords}
+            muted={muted}
           ></Tr>
         ))}
       </ol>
@@ -239,7 +256,7 @@ export default () => {
             <div>
               <span className="text-3xl">{detailWord.text}</span>
               {detailWord.phonetic && <span>/{detailWord.phonetic}/</span>}
-              <button className="border">Delete</button>
+
               <button
                 className="border"
                 onClick={() => {
