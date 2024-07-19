@@ -1,7 +1,7 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import day from "dayjs";
+import { useEffect, useState, type ReactNode } from "react";
 import type { WordRecord } from "server";
 import { api } from "../api";
-import day from "dayjs";
 import { stringifyMeaning } from "../tools";
 
 type FormData = {

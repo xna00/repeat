@@ -24,29 +24,23 @@ export default defineConfig({
     }),
     commonjs(),
     // terser({
-    //   compress: false,
-    //   mangle: false,
+    //   compress: true,
+    //   mangle: true,
 
     // }),
     {
       name: 'replace-static-files',
 
       transform(code, id) {
-        // 检查是否包含特定的标记
         if (/\/\*STATIC_FILES\*\//.test(code)) {
-          const staticFiles = {
-            /*STATIC_FILES*/
-          };
+          const staticFiles = {};
           function readAllFiles(dirPath) {
-            // 读取目录中的内容
             readdirSync(dirPath).forEach((file) => {
               const fullPath = join(dirPath, file);
               const fileStats = statSync(fullPath);
               if (fileStats.isDirectory()) {
-                // 如果是目录，递归调用 readAllFiles
                 readAllFiles(fullPath);
               } else {
-                // 如果是文件，将文件路径和状态添加到 map 中
                 staticFiles["/" + relative("./www", fullPath)] = [
                   ...readFileSync(fullPath, {}),
                 ];
@@ -58,11 +52,9 @@ export default defineConfig({
           const ret = code
             .replace(/\/\*STATIC_FILES\*\//g, str.slice(1, str.length - 1))
             .replace(`readAllFiles("./www")`, '')
-          // 替换为 {}
           return ret;
-          // console.log(id, ret)
         }
-        return null; // 如果没有找到标记，返回 null 表示不修改原始代码
+        return null;
       }
     }
   ],

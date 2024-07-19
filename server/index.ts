@@ -13,4 +13,4 @@ export type * from "./api/index.js";
 
 // export type * from "./models/index.js";
 
-export type { WordRecord } from "./drizzle/schema.js";
+export type { WordRecord, NewUser, UserRecord } from "./drizzle/schema.js";

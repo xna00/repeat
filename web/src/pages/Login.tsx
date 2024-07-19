@@ -1,4 +1,4 @@
-import type { NewUser } from "server/models/user";
+import type { NewUser } from "server";
 import { api } from "../api";
 import { useNavigate } from "react-router-dom";
 
