@@ -159,7 +159,7 @@ const Tr = ({
             <button
               className="border"
               onClick={() => {
-                api.word.removeWord(row.text).then(loadAllWords);
+                api.word.removeWord([row.text]).then(loadAllWords);
               }}
             >
               Delete

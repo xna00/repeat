@@ -1,6 +1,6 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../drizzle/db.js";
-import { type WordRecord, word } from "../drizzle/schema.js";
+import { word, words, type WordRecord } from "../drizzle/schema.js";
 import { getInfo } from "./global.js";
 import { _currentUser } from "./user.js";
 
@@ -42,7 +42,7 @@ export const addWords = async (wordRecords: string[]) => {
   return {};
 };
 
-export const removeWord = async (w: string) => {
+export const removeWord = async (w: string[]) => {
   const info = getInfo();
   const user = await _currentUser(info);
 
@@ -50,7 +50,9 @@ export const removeWord = async (w: string) => {
   //   user,
   //   text: word,
   // });
-  await db.delete(word).where(eq(word.text, w));
+  await db
+    .delete(word)
+    .where(and(inArray(word.text, w), eq(word.userId, user.id)));
   return {};
 };
 
@@ -74,4 +76,26 @@ export const getWord = async (text: string): Promise<WordRecord> => {
   }
 
   return p;
+};
+
+export const getRedundancy = async () => {
+  const info = getInfo();
+  const user = await _currentUser(info);
+
+  // return [];
+  const ws = (
+    await db
+      .select()
+      .from(word)
+      .where(and(eq(word.userId, user.id)))
+  ).map((w) => w.text);
+
+  const links = await db.select().from(words).where(inArray(words.word, ws));
+  const m = Object.fromEntries(links.map((l) => [l.word, l.linkTo]));
+
+  const ret = ws.filter((w) => {
+    const linkto = m[w];
+    return w !== linkto && ws.includes(linkto);
+  });
+  return ret;
 };
