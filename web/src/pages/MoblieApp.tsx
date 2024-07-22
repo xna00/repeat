@@ -2,7 +2,6 @@ import day from "dayjs";
 import { useEffect, useRef, useState } from "react";
 import type { WordRecord } from "server";
 import { api } from "../api";
-import { getSense } from "../api/cache";
 import Drawer from "../components";
 import SelectOrder from "../components/SelectOrder";
 import { useWords } from "../hooks/useWords";
@@ -125,7 +124,7 @@ const Tr = ({
                   setPendingWord(row.text);
                 }
                 if (!sense) {
-                  getSense(word.text).then((r) => {
+                  api.learn.getSense(word.text).then((r) => {
                     setSense(r);
                   });
                 }
@@ -139,7 +138,7 @@ const Tr = ({
       <div
         className="bg-red-300 w-20 self-stretch flex-shrink-0 snap-start ml-px"
         onClick={() => {
-          api.word.removeWord(word.text).then(() => {
+          api.word.removeWord([word.text]).then(() => {
             setDetailWord(undefined);
             loadAllWords();
           });
@@ -269,7 +268,7 @@ export default () => {
                       console.log(url);
                       return c.delete(url);
                     })
-                    .then(() => getSense(detailWord.text))
+                    .then(() => api.learn.getSense(detailWord.text))
                     .then((r) => setDetailWord({ ...detailWord, ...r }));
                 }}
               >

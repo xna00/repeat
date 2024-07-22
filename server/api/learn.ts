@@ -2,7 +2,13 @@
 // import { Word } from "../models/word.js";
 import { eq } from "drizzle-orm";
 import { db } from "../drizzle/db.js";
-import { type NewLog, log, word } from "../drizzle/schema.js";
+import {
+  type NewLog,
+  log,
+  word,
+  words,
+  protoWords,
+} from "../drizzle/schema.js";
 import { getInfo } from "./global.js";
 import { _currentUser } from "./user.js";
 import type { OmitFrom } from "../drizzle/utils.js";
@@ -68,24 +74,75 @@ export const getSense = async (word: string) => {
   const dict = await fetch("https://cn.bing.com/dict/search?q=" + word);
   const text = await dict.text();
 
-  const phonetic = (
-    text.match(/hd_prUS b_primtxt.+?\[(.+?)\]/)?.at(1) ?? ""
-  ).replace(/&#(\d+);/gi, (match, numStr) => {
-    const num = parseInt(numStr, 10);
-    return String.fromCharCode(num);
-  });
-  const meaning: Meaning[] = [
-    ...text.matchAll(
-      /<span class="pos.*?">(.+?)<\/span><span class="def b_regtxt"><span>(.+?)<\/span><\/span>/g
-    ),
-  ].map((m) => {
-    let pos = m.at(1) ?? "";
-    pos = pos === "网络" ? "web." : pos;
-    return {
-      pos,
-      def: m.at(2) ?? "",
-    };
-  });
+  // const phonetic = (
+  //   text.match(/hd_prUS b_primtxt.+?\[(.+?)\]/)?.at(1) ?? ""
+  // ).replace(/&#(\d+);/gi, (match, numStr) => {
+  //   const num = parseInt(numStr, 10);
+  //   return String.fromCharCode(num);
+  // });
+  // let meaning: Meaning[] = [
+  //   ...text.matchAll(
+  //     /<span class="pos.*?">(.+?)<\/span><span class="def b_regtxt"><span>(.+?)<\/span><\/span>/g
+  //   ),
+  // ].map((m) => {
+  //   let pos = m.at(1) ?? "";
+  //   pos = pos === "网络" ? "web." : pos;
+  //   return {
+  //     pos,
+  //     def: m.at(2) ?? "",
+  //   };
+  // });
+
+  let phonetic = "";
+  let meaning: Meaning[] = [];
+
+  const collins = (
+    await db.select().from(words).where(eq(words.word, word))
+  ).at(0);
+
+  if (collins) {
+    const proto = (
+      await db
+        .select()
+        .from(protoWords)
+        .where(eq(protoWords.word, collins.linkTo))
+    ).at(0);
+    if (proto) {
+      const p = proto as {
+        forms?: {
+          third?: string;
+          done?: string;
+          ing?: string;
+          past?: string;
+          plural?: string;
+          noun?: string;
+          verb?: string;
+          adverb?: string;
+          adjective?: string;
+          comparative?: string;
+          superlative?: string;
+        };
+        senses?: {
+          form?: string;
+          chineseExplanation?: string;
+          englishExplanation?: string;
+          tips?: string[];
+          examples?: {
+            english?: string;
+            chinese?: string;
+            grammar?: string;
+          }[];
+          synonym?: string[];
+        }[];
+      };
+
+      meaning =
+        p.senses?.map((s) => ({
+          pos: s.form ? s.form + "." : "",
+          def: s.chineseExplanation ?? "",
+        })) ?? [];
+    }
+  }
 
   return { phonetic, meaning };
 };

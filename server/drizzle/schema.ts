@@ -43,3 +43,20 @@ word.$inferInsert;
 export type NewWord = {
   text: string;
 };
+
+export const words = sqliteTable("words", {
+  word: text("word").primaryKey().notNull(),
+  linkTo: text("linkTo").notNull(),
+});
+
+export const protoWords = sqliteTable("protoWords", {
+  word: text("word").primaryKey().notNull(),
+  forms: text("forms", {
+    mode: "json",
+  }).notNull(),
+  senses: text("senses", {
+    mode: "json",
+  }).notNull(),
+});
+
+protoWords.$inferSelect;

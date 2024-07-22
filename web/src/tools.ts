@@ -15,11 +15,7 @@ export const plainText = (html: string) => {
 };
 
 export const stringifyMeaning = (m?: Meaning[]) => {
-  return (
-    m
-      ?.map((m) => `${m.pos === "网络" ? m.pos + "." : m.pos}${m.def}`)
-      .join("；") ?? ""
-  );
+  return m?.map((m) => `${m.def}`).join("；") ?? "";
 };
 
 const player = new Audio();
