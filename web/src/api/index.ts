@@ -40,7 +40,6 @@ const createHandler = (base: string): any => {
         if (res.status === 401) {
           location.href = "/login";
         }
-        console.log([...res.headers]);
         if (
           res.headers.get("content-type")?.toLowerCase() === "application/json"
         ) {
