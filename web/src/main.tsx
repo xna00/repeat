@@ -5,12 +5,13 @@ import "./global.css";
 import { mobileRouter } from "./router/mobile";
 import { pcRouter } from "./router/pc";
 
-navigator.serviceWorker
-  .register("/sw.js", {
-    type: "module",
-    scope: "/",
-  })
-  .then((s) => {});
+// navigator.serviceWorker
+//   .register("/sw.js", {
+//     type: "module",
+//     scope: "/",
+//   })
+//   .then((s) => {});
+navigator.serviceWorker.getRegistration().then((r) => r?.unregister());
 
 const wide = window.innerWidth > 700;
 
