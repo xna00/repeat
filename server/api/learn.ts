@@ -69,29 +69,37 @@ export type Meaning = {
   def: string;
 };
 
-export const getSense = async (word: string) => {
-  const info = getInfo();
+const _getBingSense = async (word: string) => {
   const dict = await fetch("https://cn.bing.com/dict/search?q=" + word);
   const text = await dict.text();
 
-  // const phonetic = (
-  //   text.match(/hd_prUS b_primtxt.+?\[(.+?)\]/)?.at(1) ?? ""
-  // ).replace(/&#(\d+);/gi, (match, numStr) => {
-  //   const num = parseInt(numStr, 10);
-  //   return String.fromCharCode(num);
-  // });
-  // let meaning: Meaning[] = [
-  //   ...text.matchAll(
-  //     /<span class="pos.*?">(.+?)<\/span><span class="def b_regtxt"><span>(.+?)<\/span><\/span>/g
-  //   ),
-  // ].map((m) => {
-  //   let pos = m.at(1) ?? "";
-  //   pos = pos === "网络" ? "web." : pos;
-  //   return {
-  //     pos,
-  //     def: m.at(2) ?? "",
-  //   };
-  // });
+  const phonetic = (
+    text.match(/hd_prUS b_primtxt.+?\[(.+?)\]/)?.at(1) ?? ""
+  ).replace(/&#(\d+);/gi, (match, numStr) => {
+    const num = parseInt(numStr, 10);
+    return String.fromCharCode(num);
+  });
+  let meaning: Meaning[] = [
+    ...text.matchAll(
+      /<span class="pos.*?">(.+?)<\/span><span class="def b_regtxt"><span>(.+?)<\/span><\/span>/g
+    ),
+  ].map((m) => {
+    let pos = m.at(1) ?? "";
+    pos = pos === "网络" ? "web." : pos;
+    return {
+      pos,
+      def: m.at(2) ?? "",
+    };
+  });
+
+  return {
+    phonetic,
+    meaning,
+  };
+};
+
+export const getSense = async (word: string) => {
+  const info = getInfo();
 
   let phonetic = "";
   let meaning: Meaning[] = [];
@@ -144,5 +152,6 @@ export const getSense = async (word: string) => {
     }
   }
 
-  return { phonetic, meaning };
+  if (meaning.length) return { phonetic, meaning };
+  else return _getBingSense(word);
 };
