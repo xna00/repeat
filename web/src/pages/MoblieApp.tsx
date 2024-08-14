@@ -5,7 +5,7 @@ import { api } from "../api";
 import Drawer from "../components";
 import SelectOrder from "../components/SelectOrder";
 import { useWords } from "../hooks/useWords";
-import { playWord, stringifyMeaning } from "../tools";
+import { isToday, playWord, stringifyMeaning } from "../tools";
 
 type Sense = Awaited<ReturnType<typeof api.learn.getSense>>;
 
@@ -95,7 +95,9 @@ const Tr = ({
               {word.lastGrade}/
               {word.lastTime
                 ? day(word.lastTime).format(
-                    day(word.lastTime).year() === day().year()
+                    isToday(new Date(word.lastTime))
+                      ? "HH:mm:ss"
+                      : day(word.lastTime).year() === day().year()
                       ? "MM-DD HH:mm:ss"
                       : "YY-MM-DD HH:mm:ss"
                   )
@@ -165,6 +167,10 @@ export default () => {
         <button onClick={() => setMuted(!muted)}>
           {muted ? "unmute" : "mute"}
         </button>
+        {
+          words.filter((w) => w.lastTime && isToday(new Date(w.lastTime)))
+            .length
+        }
       </header>
       <Drawer
         visible={filterVisible}
