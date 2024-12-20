@@ -1,5 +1,5 @@
 import day from "dayjs";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { WordRecord } from "server";
 import { api } from "../api";
 import Drawer from "../components";
@@ -158,19 +158,29 @@ export default () => {
   const [filterVisible, setFilterVisible] = useState(false);
   const [muted, setMuted] = useState(false);
 
+  const [todayCount, oneCount, twoCount, threeCount] = useMemo(
+    () => [
+      words.filter((w) => w.lastTime && isToday(new Date(w.lastTime))).length,
+      words.filter((w) => w.lastGrade === 1).length,
+      words.filter((w) => w.lastGrade === 2).length,
+      words.filter((w) => w.lastGrade === 3).length,
+    ],
+    [words]
+  );
+
   return (
     <div className="">
       <header className="flex text-lg gap-x-3 [&:has(>:checked)~ol>li>div.word-box]:flex-row-reverse sticky top-0 bg-white p-2 items-center">
         <button onClick={() => setFilterVisible(true)}>Filter</button>
         <input type="checkbox" className="" />
         {formData.pageNumber}-{formData.pageSize}-{allWords.length}
-        <button onClick={() => setMuted(!muted)}>
+        {/* <button onClick={() => setMuted(!muted)}>
           {muted ? "unmute" : "mute"}
-        </button>
-        {
-          words.filter((w) => w.lastTime && isToday(new Date(w.lastTime)))
-            .length
-        }
+        </button> */}
+        <span>{todayCount}</span>
+        <span className="">
+          {oneCount}/{twoCount}
+        </span>
       </header>
       <Drawer
         visible={filterVisible}

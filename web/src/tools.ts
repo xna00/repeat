@@ -29,3 +29,12 @@ export function playWord(w: string) {
     `https://ssl.gstatic.com/dictionary/static/sounds/oxford/${w}--_us_1.mp3`
   ).catch(() => play(`https://dict.youdao.com/dictvoice?audio=${w}&type=2`));
 }
+
+export const isToday = (date: Date) => {
+  const today = new Date();
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
+};
