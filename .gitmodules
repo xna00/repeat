@@ -1,0 +1,3 @@
+[submodule "cli/tdom"]
+	path = cli/tdom
+	url = git@github.com:xna00/tdom.git
