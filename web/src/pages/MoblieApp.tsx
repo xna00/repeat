@@ -270,6 +270,7 @@ export default () => {
           {detailWord && (
             <div>
               <span className="text-3xl">{detailWord.text}</span>
+              <span>({detailWord.id})</span>
               {detailWord.phonetic && <span>/{detailWord.phonetic}/</span>}
 
               <button
