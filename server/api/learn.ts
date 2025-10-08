@@ -67,6 +67,8 @@ export const learn = async (l: OmitFrom<NewLog, "createAt" | "userId">) => {
 export type Meaning = {
   pos: string;
   def: string;
+  enDef?: string;
+  examples?: { english?: string; chinese?: string }[];
 };
 
 const _getBingSense = async (word: string) => {
@@ -148,10 +150,21 @@ export const getSense = async (word: string) => {
         p.senses?.map((s) => ({
           pos: s.form ? s.form + "." : "",
           def: s.chineseExplanation ?? "",
+          enDef: s.englishExplanation ?? "",
+          examples: s.examples ?? [],
         })) ?? [];
     }
   }
 
   if (meaning.length) return { phonetic, meaning };
-  else return _getBingSense(word);
+  else {
+    try {
+      return _getBingSense(word);
+    } catch {
+      return {
+        phonetic: "",
+        meaning: [],
+      };
+    }
+  }
 };

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { WordRecord } from "server";
-import { api } from "../api";
-import { localStorageJson } from "../tools";
+import { api } from "./api.js";
+import cfg from "./cfg.js";
 
 export type FilterFormData = {
   pageNumber: number;
@@ -17,18 +17,16 @@ export type FilterFormData = {
   };
 };
 
-const FilterFormDataKey = "FilterFormDataKey";
 export const useWords = () => {
   const [allWords, setAllWords] = useState<WordRecord[]>([]);
-  const [formData, setFormData] = useState<FilterFormData>(
-    localStorageJson(FilterFormDataKey, {
-      pageNumber: 1,
-      pageSize: 600,
-      onlyUnfamiliar: true,
-      globalOrder: { key: "text", asc: true },
-      inPageOrder: { key: "text", asc: true },
-    })
-  );
+  const formData: FilterFormData = {
+    pageNumber: 1,
+    pageSize: 600,
+    globalOrder: { key: "text", asc: true },
+    inPageOrder: { key: "text", asc: true },
+    onlyUnfamiliar: true,
+    ...cfg,
+  };
 
   const { pageNumber, pageSize } = formData;
 
@@ -56,7 +54,7 @@ export const useWords = () => {
     });
 
   const loadAllWords = () => {
-    api.word.getAllWords().then((res) => {
+    return api.word.getAllWords().then((res) => {
       console.log(res);
       setAllWords(res);
     });
@@ -66,13 +64,8 @@ export const useWords = () => {
     loadAllWords();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem(FilterFormDataKey, JSON.stringify(formData));
-  }, [formData]);
-
   return {
     formData,
-    setFormData,
     words,
     loadAllWords,
     allWords,

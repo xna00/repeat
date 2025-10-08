@@ -28,6 +28,7 @@
     "@rollup/plugin-terser": "^0.4.4",
     "better-sqlite3": "^11.1.2",
     "cookie": "^0.6.0",
-    "drizzle-orm": "^0.32.0"
+    "drizzle-orm": "^0.32.0",
+    "sqlite3": "^5.1.7"
   }
 }

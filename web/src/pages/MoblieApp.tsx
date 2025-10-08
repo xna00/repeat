@@ -48,7 +48,10 @@ const Tr = ({
   }, [grade, pending]);
 
   return (
-    <li className="flex overflow-x-scroll overflow-y-hidden snap-x snap-mandatory">
+    <li
+      id={word.text}
+      className="flex overflow-x-scroll overflow-y-hidden snap-x snap-mandatory"
+    >
       <div
         className="flex items-center border-b border-b-orange-100 py-1 w-full flex-shrink-0 snap-start word-box"
         onClick={() => {
@@ -66,6 +69,11 @@ const Tr = ({
                 onClick={(e) => {
                   e.preventDefault();
                   setDetailWord({ ...word, ...sense });
+                }}
+                onDoubleClick={() => {
+                  window.open(
+                    `https://dictionary.cambridge.org/dictionary/english-chinese-simplified/${word.text}`
+                  );
                 }}
               >
                 {word.text}
@@ -173,13 +181,24 @@ export default () => {
       <header className="flex text-lg gap-x-3 [&:has(>:checked)~ol>li>div.word-box]:flex-row-reverse sticky top-0 bg-white p-2 items-center">
         <button onClick={() => setFilterVisible(true)}>Filter</button>
         <input type="checkbox" className="" />
-        {formData.pageNumber}-{formData.pageSize}-{allWords.length}
+        {words.length}/{formData.pageNumber}-{formData.pageSize}
         {/* <button onClick={() => setMuted(!muted)}>
           {muted ? "unmute" : "mute"}
         </button> */}
         <span>{todayCount}</span>
         <span className="">
           {oneCount}/{twoCount}
+        </span>
+        <span
+          className="ml-1"
+          onClick={() => {
+            const w = words.find(
+              (w) => !w.lastTime || !isToday(new Date(w.lastTime))
+            );
+            w && document.getElementById(w.text)?.scrollIntoView();
+          }}
+        >
+          GO
         </span>
       </header>
       <Drawer
@@ -191,6 +210,7 @@ export default () => {
         <div className="w-[75vw] bg-white h-full">
           <label>
             Page number
+            <br />
             <input
               type="number"
               className="border"
@@ -203,8 +223,10 @@ export default () => {
               }}
             ></input>
           </label>
+          <br />
           <label>
             Page size
+            <br />
             <input
               type="number"
               className="border"
@@ -217,8 +239,10 @@ export default () => {
               }}
             ></input>
           </label>
+          <br />
           <label>
             Global order
+            <br />
             <SelectOrder
               words={words}
               value={JSON.stringify(formData.globalOrder)}
@@ -233,6 +257,7 @@ export default () => {
           <br />
           <label>
             In page order
+            <br />
             <SelectOrder
               words={words}
               value={JSON.stringify(formData.inPageOrder)}
@@ -243,6 +268,22 @@ export default () => {
                 });
               }}
             ></SelectOrder>
+          </label>
+          <br />
+          <label>
+            Only unfamiliar
+            <br />
+            <input
+              type="checkbox"
+              className="border"
+              checked={formData.onlyUnfamiliar}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  onlyUnfamiliar: e.target.checked,
+                });
+              }}
+            ></input>
           </label>
         </div>
       </Drawer>
@@ -302,6 +343,11 @@ export default () => {
               </li>
             ))}
           </ol>
+          {/* {detailWord && (
+            <iframe
+              src={`https://dictionary.cambridge.org/dictionary/english-chinese-simplified/${detailWord.text}`}
+            ></iframe>
+          )} */}
         </div>
       </Drawer>
     </div>

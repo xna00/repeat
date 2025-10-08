@@ -1,0 +1,25 @@
+{
+  "name": "cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc; pnpx esbuild dist/rec2.js --bundle --outfile=bundle.js --platform=node --format=esm --main-fields=main,module --external:\"./cfg.js\""
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^16.11.7",
+    "@types/react": "^18.0.35"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "react": "^18.2.0",
+    "tdom": "./tdom",
+    "server": "workspace:*"
+  },
+  "workspaces":["tdom"]
+}

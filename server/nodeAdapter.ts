@@ -1,13 +1,13 @@
 import assert from "assert";
 import { readFileSync, readdirSync, statSync } from "fs";
 import type { IncomingMessage, ServerResponse } from "http";
-import { createServer } from "https";
+import { createServer } from "http";
 import { extname, join, relative } from "path";
 import { Readable } from "stream";
 import { apiHandler } from "./api/handler.js";
 
 const port = 3001;
-const base = `https://localhost:${port}`;
+const base = `http://localhost:${port}`;
 
 export const makeRequest = (req: IncomingMessage): Request => {
   assert(req.url);
@@ -31,7 +31,11 @@ export const respond = (
   },
   response: Response
 ) => {
-  res.writeHead(response.status, Object.fromEntries(response.headers));
+  res.writeHead(
+    response.status,
+    response.statusText,
+    Object.fromEntries(response.headers)
+  );
   if (response.body) {
     Readable.fromWeb(response.body).pipe(res, { end: true });
   } else {
@@ -71,30 +75,23 @@ const mimeTypes: Record<string, string> = {
   ".svg": "image/svg+xml",
 };
 
-const server = createServer(
-  {
-    cert: readFileSync("./certs/server.crt"),
-    key: readFileSync("./certs/server.key"),
-  },
-  (req, res) => {
-    console.log(req.url);
+const server = createServer({}, (req, res) => {
+  console.log(req.url);
 
-    assert(req.url);
-    const pathname = new URL(req.url, base).pathname;
-    if (req.url.startsWith("/api/")) {
-      apiHandler(makeRequest(req)).then(respond.bind(null, res));
-    } else {
-      const path =
-        staticFiles[pathname] !== undefined ? pathname : "/index.html";
-      const ext = extname(path).toLowerCase();
-      const contentType = mimeTypes[ext] || "application/octet-stream";
-      res.writeHead(200, "OK", {
-        "content-type": contentType,
-      });
-      res.end(Buffer.from(staticFiles[path]));
-    }
+  assert(req.url);
+  const pathname = new URL(req.url, base).pathname;
+  if (req.url.startsWith("/api/")) {
+    apiHandler(makeRequest(req)).then(respond.bind(null, res));
+  } else {
+    const path = staticFiles[pathname] !== undefined ? pathname : "/index.html";
+    const ext = extname(path).toLowerCase();
+    const contentType = mimeTypes[ext] || "application/octet-stream";
+    res.writeHead(200, "OK", {
+      "content-type": contentType,
+    });
+    res.end(Buffer.from(staticFiles[path]));
   }
-);
+});
 
 server.listen(port, "::");
 console.log(base);
